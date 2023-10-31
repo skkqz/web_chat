@@ -2,6 +2,8 @@ const id = JSON.parse(document.getElementById('json-username').textContent);
 const message_username = JSON.parse(document.getElementById('json-message-username').textContent);
 const receiver = JSON.parse(document.getElementById('json-username-receiver').textContent);
 
+const chatMessages = document.querySelector('#chat-messages');
+
 const socket = new WebSocket(
     'ws://'
     + window.location.host
@@ -19,7 +21,7 @@ socket.onclose = function (e) {
 }
 
 socket.onerror = function (e) {
-    console.log(e);
+    console.error(e);
 }
 
 socket.onmessage = function (e) {
@@ -27,43 +29,28 @@ socket.onmessage = function (e) {
     console.log(data);
 
     if (data.username == message_username) {
-        document.querySelector('#chat-messages').innerHTML += `
-            <div class="message sent">
-                <div class="message-text">
-                    <p>Вы:</p>
-                    <p>${data.message}</p>
-                </div>
-                <div class="user-avatar"></div>
-            </div>`;
+        appendMessage('sent', 'Вы', data.message);
     } else {
-        document.querySelector('#chat-messages').innerHTML += `
-            <div class="message received">
-                <div class="user-avatar"></div>
-                <div class="message-text">
-                    <p>${data.username}:</p>
-                    <p>${data.message}</p>
-                </div>
-            </div>`;
+        appendMessage('received', data.username, data.message);
     }
+
+    // Прокрутка вниз при появлении новых сообщений
+    chatMessages.scrollTop = chatMessages.scrollHeight;
 };
 
-    // if(data.username == message_username){
-    //     document.querySelector('#chat-body').innerHTML += `<tr>
-    //                                                             <td>
-    //                                                             <p class="bg-success p-2 mt-2 mr-5 shadow-sm text-white float-right rounded">${data.message}</p>
-    //                                                             </td>
-    //                                                         </tr>`
-    // }else{
-    //     document.querySelector('#chat-body').innerHTML += `<tr>
-    //                                                             <td>
-    //                                                             <p class="bg-primary p-2 mt-2 mr-5 shadow-sm text-white float-left rounded">${data.message}</p>
-    //                                                             </td>
-    //                                                         </tr>`
-    // }
-
-
-
 document.querySelector('#chat-message-submit').onclick = function (e) {
+    sendMessage();
+};
+
+// Отправка сообщения при нажатии клавиши "Enter"
+document.querySelector('#message-input').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault(); // Предотвращаем перенос строки
+        sendMessage();
+    }
+});
+
+function sendMessage() {
     const message_input = document.querySelector('#message-input');
     const message = message_input.value;
 
@@ -71,7 +58,22 @@ document.querySelector('#chat-message-submit').onclick = function (e) {
         'message': message,
         'username': message_username,
         'receiver': receiver,
-    }))
+    }));
 
     message_input.value = '';
-};
+}
+
+function appendMessage(type, sender, message) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${type}`;
+    messageDiv.innerHTML = `
+        <div class="message-text">
+            <p>${sender}:</p>
+            <p>${message}</p>
+        </div>
+    `;
+    chatMessages.appendChild(messageDiv);
+
+    // Прокрутка вниз при добавлении нового сообщения
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}

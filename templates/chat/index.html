@@ -1,4 +1,5 @@
 {% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,47 +9,53 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-<div class="header">
-    <h2>Чат</h2>
-</div>
-<div class="chat-container">
-    <div class="user-list">
-        <ul>
-            {% for user in users %}
-            <li>
-                <div class="user-avatar"></div>
-                <div class="user-info">
-                    <a href="{% url 'chat' username=user.username %}">{{user.username}}</a>
-                </div>
-            </li>
-            <!-- Добавьте здесь больше пользователей -->
-            {% endfor %}
-        </ul>
-    </div>
-    <div class="chat">
-        <div class="chat-messages" id="chat-messages">
-            {% for message in messages %}
-                <div class="message {% if message.sender == request.user.username %}sent{% else %}received{% endif %}">
-                    <div class="message-text">
-                        <p>{{ message.sender }}:</p>
-                        <p>{{ message.message }}</p>
+    <div class="chat-container">
+        <div class="user-list">
+            <div class="header">
+                <h3>Пользователи</h3>
+            </div>
+            <ul>
+                {% for user in users %}
+                <li class="user">
+                    <div class="user-avatar">
+                        <img src="{% static 'assets/dp.png' %}" alt="User Avatar">
                     </div>
-                    <div class="user-avatar"></div>
-                </div>
-            {% endfor %}
+                    <div class="user-info">
+                        <a href="{% url 'chat' username=user.username %}">{{user.username}}</a>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
         </div>
-        <div class="chat-input">
-            <input type="text" id="message-input" placeholder="Напишите сообщение...">
-            <button id="chat-message-submit" type="submit">Отправить</button>
+        <div class="chat">
+            <div class="header">
+                <div class="user-avatar">
+                    <img src="{% static 'assets/dp.png' %}" alt="User Avatar">
+                </div>
+                <h2>{{ user.username }}</h2>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                {% for message in messages %}
+                    <div class="message {% if message.sender == request.user.username %}sent{% else %}received{% endif %}">
+                        <div class="message-info">
+                            <p>{{ message.sender }}</p>
+                            <p>{{ message.timestamp }}</p>
+                        </div>
+                        <div class="message-text">
+                            {{ message.message }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="chat-input">
+                <input type="text" id="message-input" placeholder="Введите сообщение">
+                <button type="submit" id="chat-message-submit">Отправить</button>
+            </div>
         </div>
     </div>
-</div>
+    {{user.id|json_script:"json-username"}}
+    {{user.username|json_script:"json-username-receiver"}}
+    {{request.user.username|json_script:"json-message-username"}}
+    <script src="{% static 'js/chat.js' %}"></script>
 </body>
 </html>
-
-
-
-{{user.id|json_script:"json-username"}}
-{{user.username|json_script:"json-username-receiver"}}
-{{request.user.username|json_script:"json-message-username"}}
-<script src="{% static 'js/chat.js' %}"></script>

@@ -8,17 +8,17 @@ from django.contrib.auth.models import User
 
 class PersonalChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        my_id = self.scope['user'].id  # Получаем идентификатор текущего пользователя из атрибута 'user' в scope
-        other_user_id = self.scope['url_route']['kwargs']['id']  # Получаем идентификатор другого пользователя из URL-параметров
+        my_id = self.scope['user'].id
+        other_user_id = self.scope['url_route']['kwargs']['id']
 
         print(f'my_id: {my_id} // id_user: {other_user_id}')
 
-        if int(my_id) > int(other_user_id):  # Сравниваем идентификаторы, чтобы создать уникальное имя комнаты
-            self.room_name = f'{my_id}-{other_user_id}'  # Формируем имя комнаты
+        if int(my_id) > int(other_user_id):
+            self.room_name = f'{my_id}-{other_user_id}'
         else:
-            self.room_name = f'{other_user_id}-{my_id}'  # Формируем имя комнаты
+            self.room_name = f'{other_user_id}-{my_id}'  #
 
-        self.room_group_name = 'chat_%s' % self.room_name  # Формируем имя группы для WebSocket-комнаты
+        self.room_group_name = 'chat_%s' % self.room_name
 
         await self.channel_layer.group_add(
             self.room_group_name,
@@ -29,7 +29,7 @@ class PersonalChatConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data=None, bytes_data=None):
         data = json.loads(text_data)  # Распаковываем JSON-данные из текстового сообщения
-        print(data)  # Выводим данные в консоль
+        print(data)
         message = data['message']  # Извлекаем сообщение из данных
         username = data['username']  # Извлекаем имя пользователя из данных
         receiver = data['receiver']  # Извлекаем получателя сообщения из данных
@@ -39,7 +39,7 @@ class PersonalChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(
             self.room_group_name,
             {
-                'type': 'chat_message',  # Отправляем событие типа 'chat_message'
+                'type': 'chat_message',
                 'message': message,
                 'username': username,
             }
