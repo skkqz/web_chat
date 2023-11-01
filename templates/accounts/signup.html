@@ -1,0 +1,42 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/signup.css' %}">
+</head>
+<body>
+<div class="login-container">
+    <div class="login-form">
+        <h2>Регистрация</h2>
+        {% if request.user.is_authenticated %}
+            <h3>{{ request.user.name }} Вы уже прошли регистрацию</h3>
+        {% else %}
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    {{ field.label|lower }}
+                    {{ field }}
+
+                    {% if field.errors %}
+                        {% for error in field.errors %}
+                            <div class="error">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+
+<!--                    {% if field.name == 'password1' or field.name == 'password2' %}-->
+<!--                        <input type="password" placeholder="{{ field.label|lower }}" required>-->
+<!--                    {% else %}-->
+<!--                        <input placeholder="{{ field.label|lower }}">-->
+<!--                    {% endif %}-->
+                {% endfor %}
+                <button type="submit">Зарегистрироваться</button>
+            </form>
+        {% endif %}
+        <a href="/">Назад</a>
+    </div>
+</div>
+</body>
+</html>
