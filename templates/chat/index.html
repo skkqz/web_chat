@@ -21,7 +21,7 @@
                         <img src="{% static 'assets/dp.png' %}" alt="User Avatar">
                     </div>
                     <div class="user-info">
-                        <a href="{% url 'chat' username=user.username %}">{{user.username}}</a>
+                        <a href="{% url 'chat:chat' username=user.username %}">{{user.username}}</a>
                     </div>
                 </li>
                 {% endfor %}

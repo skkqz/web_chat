@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.views.generic import TemplateView
 
@@ -6,7 +7,7 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
-class IndexView(TemplateView):
+class IndexView(LoginRequiredMixin, TemplateView):
 
     template_name = 'chat/index.html'
 
@@ -16,7 +17,7 @@ class IndexView(TemplateView):
         return context
 
 
-class ChatView(TemplateView):
+class ChatView(LoginRequiredMixin, TemplateView):
 
     template_name = 'chat/index.html'
 

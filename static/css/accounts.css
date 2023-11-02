@@ -16,6 +16,7 @@ body {
     padding: 20px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
     text-align: center;
+    width: 20%;
 }
 
 h2 {
@@ -50,13 +51,14 @@ button {
 a {
     text-decoration: none;
     color: #007BFF;
+    transition: color 0.2s; /* Добавим плавный переход для изменения цвета текста */
 }
 
 a:hover {
-    text-decoration: underline;
+    color: #0055a5; /* Указываем цвет текста при наведении */
 }
 
 .error {
-    color: red;
+    color: #007BFF;
     margin: 5px 0;
 }

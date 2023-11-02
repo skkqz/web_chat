@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Вход{% endblock %}
+{% block static %}<link rel="stylesheet" type="text/css" href="{% static 'css/accounts.css' %}">{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-form">
+        <h2>Вход</h2>
+        {% if request.user.is_authenticated %}
+        <h3>Вы уже авторизованы</h3>
+        <a href="/">Назад</a>
+        {% else %}
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" id="{{ field.id_for_label }}" placeholder="{{ field.label }}">
+
+                {% endfor %}
+                {% if form.non_field_errors %}
+                    <p class="error">
+                        {{ form.non_field_errors.0 }}
+                    </p>
+                {% endif %}
+                <button type="submit">Вход</button>
+            </form>
+        <a href="{% url 'accounts:signup' %}">Регистрация</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

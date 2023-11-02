@@ -13,6 +13,6 @@ class CustomUserCreationForm(UserCreationForm):
         model = CustomUserModel
         fields = ['username', 'email', ]
         labels = {
-            'username': 'Имя польз2ователя',
-            'email': 'Электронная2 почта',
+            'username': 'Имя пользователя',
+            'email': 'Электронная почта',
         }
