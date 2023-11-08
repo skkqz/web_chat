@@ -15,11 +15,12 @@
             <form method="post">
                 {% csrf_token %}
                 {% for field in form %}
-                    {% if field.name == 'password' %}
-                        <input type="password" placeholder="{{ field.label|lower }}" required>
-                    {% else %}
-                        <input placeholder="{{ field.label|lower }}">
-                    {% endif %}
+                    <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" id="{{ field.id_for_label }}" placeholder="{{ field.label }}">
+<!--                    {% if field.name == 'password' %}-->
+<!--                        <input type="password" placeholder="{{ field.label|lower }}" required>-->
+<!--                    {% else %}-->
+<!--                        <input placeholder="{{ field.label|lower }}">-->
+<!--                    {% endif %}-->
 
                     {% if field.errors %}
                         {% for error in field.errors %}
