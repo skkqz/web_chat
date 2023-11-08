@@ -10,6 +10,9 @@ User = get_user_model()
 
 
 class IndexView(LoginRequiredMixin, TemplateView):
+    """
+    Представление домашней страницы
+    """
 
     template_name = 'chat/index.html'
 
@@ -20,6 +23,9 @@ class IndexView(LoginRequiredMixin, TemplateView):
 
 
 class ChatView(LoginRequiredMixin, TemplateView):
+    """
+    Представление чата
+    """
 
     template_name = 'chat/index.html'
 
