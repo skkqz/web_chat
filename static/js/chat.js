@@ -29,9 +29,9 @@ socket.onmessage = function (e) {
     console.log(data);
 
     if (data.username == message_username) {
-        appendMessage('sent', 'Вы', data.message);
+        appendMessage('sent', data.message);
     } else {
-        appendMessage('received', data.username, data.message);
+        appendMessage('received', data.message);
     }
 
     // Прокрутка вниз при появлении новых сообщений
@@ -63,13 +63,15 @@ function sendMessage() {
     message_input.value = '';
 }
 
-function appendMessage(type, sender, message) {
+function appendMessage(type, message) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${type}`;
+    const now = new Date();
+    const date = now.toLocaleTimeString(navigator.language, {hour: '2-digit', minute:'2-digit'});
     messageDiv.innerHTML = `
         <div class="message-text">
-            <p>${sender}:</p>
             <p>${message}</p>
+            <p class="message-date">${date}</p>
         </div>
     `;
     chatMessages.appendChild(messageDiv);
