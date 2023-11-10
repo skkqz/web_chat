@@ -15,9 +15,15 @@
                 <div class="user-avatar">
                     <img src="{% static 'assets/dp.png' %}" alt="User Avatar">
                 </div>
-                <div class="user-info">
-                    <a href="{% url 'chat:chat' username=user.username %}">{{user.username}}</a>
-                </div>
+                {% if user.profile.online_status %}
+                    <div class="user-info">
+                        <a style="color: green" id="{{user.username}}_status" href="{% url 'chat:chat' username=user.username %}">{{user.username}}</a>
+                    </div>
+                {% else %}
+                    <div class="user-info">
+                        <a style="color: grey" id="{{user.username}}_status" href="{% url 'chat:chat' username=user.username %}">{{user.username}}</a>
+                    </div>
+                {% endif %}
             </li>
             {% endfor %}
         </ul>
@@ -50,5 +56,7 @@
 {{ user.id|json_script:"json-username" }}
 {{ user.username|json_script:"json-username-receiver" }}
 {{ request.user.username|json_script:"json-message-username" }}
+{{ request.user.id|json_script:"json-user-id"}}
 <script src="{% static 'js/chat.js' %}"></script>
+<script src="{% static 'js/online_status.js' %}"></script>
 {% endblock %}

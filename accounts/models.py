@@ -39,9 +39,7 @@ class ProfileUserModel(models.Model):
         blank=True,
         null=True,
     )
-    info = models.CharField(
-        max_length=500, verbose_name="Информация о себе", blank=True, null=True
-    )
+    online_status = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
 
     class Meta:
