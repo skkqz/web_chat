@@ -3,9 +3,8 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 
-from .models import MessageChatModel
+from .models import MessageChatModel, RoomChatModel
 from accounts.models import ProfileUserModel
-
 
 User = get_user_model()
 
@@ -39,9 +38,8 @@ class PersonalChatConsumer(AsyncWebsocketConsumer):
         username = data['username']  # Извлекаем имя пользователя из данных
         receiver = data['receiver']  # Извлекаем получателя сообщения из данных
 
-        print(data)
-
-        await self.save_message(self.scope['user'].id, self.room_group_name, message)  # Сохраняем сообщение в базе данных
+        await self.save_message(self.scope['user'].id, self.room_group_name,
+                                message)  # Сохраняем сообщение в базе данных
 
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -72,11 +70,12 @@ class PersonalChatConsumer(AsyncWebsocketConsumer):
     def save_message(self, user_id, thread_name, message):
 
         profile = ProfileUserModel.objects.get(user=user_id)
+        room = RoomChatModel.objects.get(name=thread_name)
 
         MessageChatModel.objects.create(
             sender=profile,
             message=message,
-            thread_name=thread_name,
+            room_name=room,
         )
 
         # other_user_id = self.scope['url_router']['kwargs']['id']
@@ -103,7 +102,9 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
         data = json.loads(text_data)
         username = data['username']
         connection_type = data['type']
-        print(connection_type)
+
+        print(data)
+
         await self.change_online_status(username, connection_type)
 
     async def send_onlineStatus(self, event):
@@ -111,8 +112,8 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
         username = data['username']
         online_status = data['status']
         await self.send(text_data=json.dumps({
-            'username':username,
-            'online_status':online_status
+            'username': username,
+            'online_status': online_status
         }))
 
     async def disconnect(self, message):
