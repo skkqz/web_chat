@@ -38,6 +38,10 @@ socket.onmessage = function (e) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 };
 
+window.onload = function() {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+};
+
 document.querySelector('#chat-message-submit').onclick = function (e) {
     sendMessage();
 };
