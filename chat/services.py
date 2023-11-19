@@ -2,7 +2,7 @@ from django.db.models import Q
 from django.db.models.query import QuerySet
 from django.contrib.auth import get_user_model
 
-from .models import MessageChatModel, RoomChatModel
+from .models import RoomChatModel
 from accounts.models import ProfileUserModel
 
 User = get_user_model()
@@ -62,10 +62,5 @@ def get_list_rooms_users(user: User) -> QuerySet:
     users_with_chat = ProfileUserModel.objects.filter(
         Q(user_1__in=user_rooms) | Q(user_2__in=user_rooms)
     ).exclude(user=user)
-
-    # Получаем список имен пользователей
-    users_with_chat_names = users_with_chat.values_list('user', flat=True)
-
-    print(users_with_chat)
 
     return users_with_chat
