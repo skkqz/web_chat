@@ -47,7 +47,7 @@ class ProfileUserModel(models.Model):
         verbose_name_plural = "Профили"
 
     def __str__(self):
-        return self.user
+        return self.user.username
 
 
 @receiver(post_save, sender=CustomUserModel)
