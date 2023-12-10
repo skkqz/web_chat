@@ -3,7 +3,7 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.contrib.auth import get_user_model
 
-from .models import MessageChatModel, RoomChatModel
+from .models import MessageChatModel, RoomChatModel, ChatNotificationModel
 from accounts.models import ProfileUserModel
 
 User = get_user_model()
@@ -30,6 +30,8 @@ class PersonalChatConsumer(AsyncWebsocketConsumer):
             self.channel_name
         )  # Добавляем текущее соединение к группе комнаты
 
+        await self.mark_message_as_seen(self.room_group_name, my_id)
+
         await self.accept()  # Принимаем WebSocket-соединение
 
     async def receive(self, text_data=None, bytes_data=None):
@@ -38,8 +40,7 @@ class PersonalChatConsumer(AsyncWebsocketConsumer):
         username = data['username']  # Извлекаем имя пользователя из данных
         receiver = data['receiver']  # Извлекаем получателя сообщения из данных
 
-        await self.save_message(self.scope['user'].id, self.room_group_name,
-                                message)  # Сохраняем сообщение в базе данных
+        await self.save_message(self.scope['user'].id, self.room_group_name, message) # Сохраняем сообщение в базе данных
 
         await self.channel_layer.group_send(
             self.room_group_name,
@@ -47,24 +48,27 @@ class PersonalChatConsumer(AsyncWebsocketConsumer):
                 'type': 'chat_message',
                 'message': message,
                 'username': username,
+                'room_name': self.room_group_name
             }
         )  # Отправляем сообщение всем участникам комнаты
 
     async def chat_message(self, event):
-        message = event['message']  # Извлекаем сообщение из события
-        username = event['username']  # Извлекаем имя пользователя из события
+        message = event['message']
+        username = event['username']
+        room_name = event['room_name']
 
         await self.send(text_data=json.dumps({
-            'message': message,  # Отправляем сообщение обратно клиенту
+            'message': message,
             'username': username,
-            'room': self.room_group_name
+            'room_name': room_name,
+            'is_seen': False,
         }))
 
     async def disconnect(self, code):
         self.channel_layer.group_discard(
             self.room_group_name,
             self.channel_name
-        )  # Удаляем текущее соединение из группы комнаты при разрыве
+        )
 
     @database_sync_to_async
     def save_message(self, user_id, thread_name, message):
@@ -78,10 +82,28 @@ class PersonalChatConsumer(AsyncWebsocketConsumer):
             room_name=room,
         )
 
-        # other_user_id = self.scope['url_router']['kwargs']['id']
-        # get_user = User.objects.get(id=other_user_id)
-        # if receiver == get_user.username:
-        #     ChatNotification.objects.create(chat=chat_obj, user=get_user)
+        other_user_id = self.scope['url_route']['kwargs']['id']
+        receiver_profile = ProfileUserModel.objects.get(user_id=other_user_id)
+        ChatNotificationModel.objects.create(chat=room, user=receiver_profile)
+
+    @database_sync_to_async
+    def mark_message_as_seen(self, room_name, username):
+        user = User.objects.get(id=username)
+        profile = ProfileUserModel.objects.get(user=user)
+
+        room = RoomChatModel.objects.get(name=room_name)
+
+        # Обновляем статус "прочитано" в уведомлениях чата
+        ChatNotificationModel.objects.filter(chat=room, user=profile).update(is_seen=True)
+
+        # Отправляем уведомление об изменении статуса прочтения через WebSocket
+        self.channel_layer.group_send(
+            room_name,
+            {
+                'type': 'send_notification',
+                'value': json.dumps({'count': 0})  # Отправляем заглушку, вы можете передать реальные данные
+            }
+        )
 
 
 class OnlineStatusConsumer(AsyncWebsocketConsumer):
@@ -103,7 +125,7 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
         username = data['username']
         connection_type = data['type']
 
-        print(data)
+        # print(data)
 
         await self.change_online_status(username, connection_type)
 
@@ -132,3 +154,33 @@ class OnlineStatusConsumer(AsyncWebsocketConsumer):
         else:
             userprofile.online_status = False
             userprofile.save()
+
+
+class ChatNotificationConsumer(AsyncWebsocketConsumer):
+    """
+    Уведомления чата
+    """
+
+    async def connect(self):
+        my_id = self.scope['user'].id
+        self.room_group_name = f'{my_id}'
+        await self.channel_layer.group_add(
+            self.room_group_name,
+            self.channel_name
+        )
+
+        await self.accept()
+
+    async def disconnect(self, code):
+        self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name
+        )
+
+    async def send_notification(self, event):
+        data = json.loads(event.get('value'))
+        count = data['count']
+        print(count)
+        await self.send(text_data=json.dumps({
+            'count': count
+        }))

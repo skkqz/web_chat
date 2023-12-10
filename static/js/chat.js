@@ -1,6 +1,7 @@
 const id = JSON.parse(document.getElementById('json-username').textContent);
 const message_username = JSON.parse(document.getElementById('json-message-username').textContent);
 const receiver = JSON.parse(document.getElementById('json-username-receiver').textContent);
+const room_name = JSON.parse(document.getElementById('json-room-name').textContent);
 
 const chatMessages = document.querySelector('#chat-messages');
 
@@ -32,11 +33,23 @@ socket.onmessage = function (e) {
         appendMessage('sent', data.message);
     } else {
         appendMessage('received', data.message);
+
+        if (!data.is_seen && data.username !== message_username) {
+            // Вызовите функцию для обновления UI для статуса "прочитано"
+            markMessageAsRead(data);
+        }
     }
 
     // Прокрутка вниз при появлении новых сообщений
     chatMessages.scrollTop = chatMessages.scrollHeight;
 };
+
+function markMessageAsRead(data) {
+    notifications.send(JSON.stringify({
+        'room_name': data.room_name,
+        'notification_id': data.notification_id,
+    }));
+}
 
 window.onload = function() {
     chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -62,6 +75,7 @@ function sendMessage() {
         'message': message,
         'username': message_username,
         'receiver': receiver,
+        'room_name': room_name,
     }));
 
     message_input.value = '';

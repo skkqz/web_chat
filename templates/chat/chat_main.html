@@ -53,15 +53,13 @@
         </div>
     </div>
 </div>
-{{ user }}
-{{ user.username }}
-{{request.user.username}}
-{{request.user.id}}
 
 {{ user.id|json_script:"json-username" }}
 {{ user.username|json_script:"json-username-receiver" }}
 {{ request.user.username|json_script:"json-message-username" }}
 {{ request.user.id|json_script:"json-user-id"}}
+{{ room_name|json_script:"json-room-name"}}
 <script src="{% static 'js/chat.js' %}"></script>
 <script src="{% static 'js/online_status.js' %}"></script>
+<script src="{% static 'js/notifications.js' %}"></script>
 {% endblock %}

@@ -51,4 +51,5 @@ class ChatView(LoginRequiredMixin, TemplateView):
         context['users'] = users_with_chat_names
         context['user'] = user
         context['messages'] = MessageChatModel.objects.filter(room_name=room)
+        context['room_name'] = room_name
         return context

@@ -44,14 +44,17 @@ class MessageChatModel(models.Model):
         return self.message
 
 
-# class ChatNotification(models.Model):
-#     """
-#     Модель уведомлений в чате
-#     """
-#     chat = models.ForeignKey(MessageChatModel, on_delete=models.CASCADE)
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     is_seen = models.BooleanField(default=False)
-#
-#     def __str__(self) -> str:
-#         return self.user.username
-#
+class ChatNotificationModel(models.Model):
+    """
+    Модель уведомлений в чате
+    """
+    chat = models.ForeignKey(RoomChatModel, on_delete=models.CASCADE, verbose_name='Чат')
+    user = models.ForeignKey(ProfileUserModel, on_delete=models.CASCADE, verbose_name='Пользователь')
+    is_seen = models.BooleanField(default=False, verbose_name='Статус')
+
+    class Meta:
+        verbose_name = "Уведомления"
+        verbose_name_plural = "Уведомление"
+
+    def __str__(self) -> str:
+        return self.user.user.username
